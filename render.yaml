@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: trackhunt-bot
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: BOT_TOKEN
+        value: <тут твій API Token>
+      - key: CHANNEL_ID
+        value: <тут ID Telegram-каналу для бібліотеки>
