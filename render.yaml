@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 services:
   - type: web
     name: trackhunt-bot
@@ -9,3 +10,16 @@ services:
         value: 8046318140:AAG7FPa1qmJc_3j7Nk63PdgT0N97tTRP7FI
       - key: CHANNEL_ID
         value: "-1002559409885"
+=======
+services:
+  - type: web
+    name: trackhunt-bot
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8046318140:AAG7FPa1qmJc_3j7Nk63PdgT0N97tTRP7FI
+      - key: CHANNEL_ID
+        value: "-1002559409885"
+>>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32

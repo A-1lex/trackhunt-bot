@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 __pycache__/
 *.pyc
 *.db
 .env
 temp_downloads/
 logs/
+=======
+__pycache__/
+*.pyc
+.env
+logs/
+*.mp3
+*.db
+>>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32

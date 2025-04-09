@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 aiogram==2.25.2
 aiohttp
 beautifulsoup4
 python-dotenv
 fuzzywuzzy
+=======
+aiogram==2.25.2
+aiohttp
+beautifulsoup4
+python-dotenv
+fuzzywuzzy
+>>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32
 python-Levenshtein
