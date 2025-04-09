@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import sqlite3
 from config import DB_PATH
 from datetime import datetime
@@ -87,7 +87,6 @@ def get_all_queries():
     cur.execute("SELECT DISTINCT query FROM tracks")
     results = [row[0] for row in cur.fetchall()]
     conn.close()
-=======
 import sqlite3
 from config import DB_PATH
 from datetime import datetime
@@ -176,5 +175,4 @@ def get_all_queries():
     cur.execute("SELECT DISTINCT query FROM tracks")
     results = [row[0] for row in cur.fetchall()]
     conn.close()
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32
     return results

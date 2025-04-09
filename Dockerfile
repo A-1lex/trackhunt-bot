@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Вихідний образ
 FROM python:3.11-slim
 
@@ -30,4 +30,3 @@ RUN mkdir -p logs temp_downloads
 
 # Стартова команда (використовує webhook)
 CMD ["python", "bot.py"]
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import logging
 from aiogram import Bot, Dispatcher, executor, types
 from config import BOT_TOKEN
@@ -24,7 +24,6 @@ register_inline(dp)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
-=======
 import logging
 from aiogram import Bot, Dispatcher, executor, types
 from config import BOT_TOKEN
@@ -50,4 +49,3 @@ register_inline(dp)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32

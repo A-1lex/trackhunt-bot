@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import aiohttp
 from bs4 import BeautifulSoup
 import logging
@@ -36,7 +36,6 @@ async def search_music_links(query):
                     links.append(clean)
 
         logging.info(f"🔗 Знайдено {len(links)} посилань з Google для: {query}")
-=======
 import aiohttp
 from bs4 import BeautifulSoup
 import logging
@@ -74,5 +73,4 @@ async def search_music_links(query):
                     links.append(clean)
 
         logging.info(f"🔗 Знайдено {len(links)} посилань з Google для: {query}")
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32
         return links

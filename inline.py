@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from aiogram.types import InlineQuery, InlineQueryResultAudio
 from aiogram.dispatcher import Dispatcher
 from database import get_top_queries, get_cached_track
@@ -37,8 +36,7 @@ async def inline_query_handler(inline_query: InlineQuery):
 
 
 def register_inline(dp: Dispatcher):
-=======
-from aiogram.types import InlineQuery, InlineQueryResultAudio
+    from aiogram.types import InlineQuery, InlineQueryResultAudio
 from aiogram.dispatcher import Dispatcher
 from database import get_top_queries, get_cached_track
 from utils import get_audio_from_google
@@ -76,5 +74,4 @@ async def inline_query_handler(inline_query: InlineQuery):
 
 
 def register_inline(dp: Dispatcher):
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32
     dp.register_inline_handler(inline_query_handler)

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # -*- coding: utf-8 -*-
 from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -69,7 +69,6 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(popular_command, commands=["popular"])
     dp.register_message_handler(favorites_command, commands=["favorites"])
     dp.register_callback_query_handler(callback_handler, lambda c: c.data and c.data.startswith("fav:"))
-=======
 from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from utils import rate_limiter, get_audio_from_google
@@ -140,4 +139,3 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(popular_command, commands=["popular"])
     dp.register_message_handler(favorites_command, commands=["favorites"])
     dp.register_callback_query_handler(callback_handler, lambda c: c.data and c.data.startswith("fav:"))
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32

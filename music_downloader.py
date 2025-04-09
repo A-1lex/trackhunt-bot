@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import aiohttp
 import os
 import logging
@@ -18,7 +17,6 @@ async def download_mp3(url: str, filename: str = "track.mp3") -> str:
                     return filepath
     except Exception as e:
         logging.warning(f" Завантаження не вдалося: {e}")
-=======
 import aiohttp
 import os
 import logging
@@ -38,5 +36,4 @@ async def download_mp3(url: str, filename: str = "track.mp3") -> str:
                     return filepath
     except Exception as e:
         logging.warning(f" Завантаження не вдалося: {e}")
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32
-    return ""
+        return ""

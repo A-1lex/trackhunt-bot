@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import time
 import asyncio
 import logging
@@ -97,7 +96,6 @@ async def get_audio_from_google(query: str, user_id: int):
                 logging.error(f"❌ Помилка при надсиланні у канал: {e}")
 
     logging.warning(f"🚫 Результатів не знайдено для: {query}")
-=======
 import time
 import asyncio
 import logging
@@ -196,5 +194,4 @@ async def get_audio_from_google(query: str, user_id: int):
                 logging.error(f"❌ Помилка при надсиланні у канал: {e}")
 
     logging.warning(f"🚫 Результатів не знайдено для: {query}")
->>>>>>> 5852130ac5d032ece869f1de256e3f764e45de32
     return None
