@@ -13,8 +13,8 @@ async def download_mp3(url: str, filename: str = "track.mp3") -> str:
                 if resp.status == 200 and "audio" in resp.headers.get("Content-Type", ""):
                     with open(filepath, "wb") as f:
                         f.write(await resp.read())
-                    logging.info(f"⬇️ Успішно завантажено: {url}")
+                    logging.info(f"⬇ Успішно завантажено: {url}")
                     return filepath
     except Exception as e:
-        logging.warning(f"❌ Завантаження не вдалося: {e}")
+        logging.warning(f" Завантаження не вдалося: {e}")
     return ""

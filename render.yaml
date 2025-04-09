@@ -5,7 +5,7 @@ services:
     plan: free
     autoDeploy: true
     envVars:
-      - key: BOT_TOKEN
-        value: <тут твій API Token>
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8046318140:AAG7FPa1qmJc_3j7Nk63PdgT0N97tTRP7FI
       - key: CHANNEL_ID
-        value: <тут ID Telegram-каналу для бібліотеки>
+        value: "1002559409885"

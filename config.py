@@ -1,6 +1,6 @@
 import os
 
-BOT_TOKEN = "8046318140:AAG7FPa1qmJc_3j7Nk63PdgT0N97tTRP7FI"
-CHANNEL_ID = 1002559409885
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
-DB_PATH = "app/database.db"
+DB_PATH = "database.db"
