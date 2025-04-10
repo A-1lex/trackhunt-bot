@@ -1,8 +1,13 @@
 import sqlite3
+import os
 from config import DB_PATH
 from datetime import datetime
 
 def init_db():
+    # Переконаємось, що каталог для бази даних існує
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir)
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS tracks (
