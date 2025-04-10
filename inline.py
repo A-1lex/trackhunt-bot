@@ -4,6 +4,7 @@ from database import get_top_queries, get_cached_track
 from utils import get_audio_from_google
 import uuid
 
+
 async def inline_query_handler(inline_query: InlineQuery):
     query = inline_query.query.strip()
     user_id = inline_query.from_user.id
@@ -33,6 +34,7 @@ async def inline_query_handler(inline_query: InlineQuery):
             ))
 
     await inline_query.answer(results[:10], cache_time=1, is_personal=True)
+
 
 def register_inline(dp: Dispatcher):
     dp.register_inline_handler(inline_query_handler)

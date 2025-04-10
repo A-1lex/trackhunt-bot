@@ -1,8 +1,7 @@
 import os
 import time
-import asyncio
 import logging
-from aiogram import types, Bot
+from aiogram import types
 from functools import wraps
 from collections import defaultdict, deque
 from fuzzywuzzy import fuzz
@@ -12,10 +11,7 @@ from database import get_cached_track, save_track, get_all_queries
 from search_sources import search_music_links
 from music_downloader import download_mp3
 
-# Для збереження інстансу бота
-bot_instance: Bot = None
 
-# Антиспам-контроль
 user_requests = defaultdict(lambda: deque(maxlen=20))
 
 
@@ -28,12 +24,10 @@ def rate_limiter(seconds: int = 2, max_per_minute: int = 10):
             user_id = message.from_user.id
             now = time.time()
 
-            # Перевірка затримки між запитами
             if user_id in user_timestamps and (now - user_timestamps[user_id]) < seconds:
                 await message.reply("⏳ Занадто швидко. Зачекайте кілька секунд.")
                 return
 
-            # Ліміт за хвилину
             user_requests[user_id].append(now)
             recent = [t for t in user_requests[user_id] if now - t < 60]
             if len(recent) > max_per_minute:
@@ -59,11 +53,10 @@ def find_similar_query(query: str, all_queries: list, threshold: int = 85):
 
 
 async def get_audio_from_google(query: str, user_id: int):
-    from bot import bot  # імпортуємо інстанс
+    from bot import bot
 
     logging.info(f"🔍 Запит користувача {user_id}: {query}")
 
-    # Кешований трек
     cached = get_cached_track(query)
     if not cached:
         all_qs = get_all_queries()
@@ -76,8 +69,7 @@ async def get_audio_from_google(query: str, user_id: int):
         logging.info(f"📦 Кешований результат для '{query}': {cached['title']} — {cached['artist']}")
         return cached
 
-    # Пошук через Google
-    logging.info(f"🌐 Google-пошук для: {query}")
+    logging.info(f"🌐 Пошук на mp3xa.fm для: {query}")
     links = await search_music_links(query)
 
     if not links:
@@ -112,9 +104,3 @@ async def get_audio_from_google(query: str, user_id: int):
     logging.warning(f"❌ Не вдалося обробити жодне посилання для: {query}")
     await bot.send_message(user_id, "⚠️ Пісню не вдалося завантажити. Спробуйте іншу.")
     return None
-
-
-# Якщо потрібно використовувати глобальний бот інстанс
-async def setup_webhook(bot: Bot):
-    global bot_instance
-    bot_instance = bot

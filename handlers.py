@@ -8,11 +8,11 @@ import logging
 @rate_limiter(3)
 async def handle_message(message: types.Message):
     query = message.text.strip()
-    logging.info(f"📩 Отримано повідомлення: {query}")
+    logging.info(f"📩 Отримане повідомлення: {query}")
     track = await get_audio_from_google(query, message.from_user.id)
 
     if not track:
-        # Відповідь уже відправлена у utils.py
+        # Відповідь вже надана в utils
         return
 
     keyboard = InlineKeyboardMarkup().add(
