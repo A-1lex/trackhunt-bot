@@ -24,6 +24,7 @@ async def parse_z3fm(query: str) -> list:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
+            logging.debug(f"🔍 HTML-сторінка для z3.fm:\n{html[:1000]}")  # Логую перші 1000 символів HTML
             soup = BeautifulSoup(html, "html.parser")
             links = []
             for a in soup.find_all("a", class_="download"):
@@ -38,9 +39,10 @@ async def parse_mp3wr(query: str) -> list:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
+            logging.debug(f"🔍 HTML-сторінка для mp3wr.com:\n{html[:1000]}")
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for a in soup.find_all("a", class_="btn-download"):  # Змінили селектор
+            for a in soup.find_all("a", class_="btn-download"):
                 href = a.get("href")
                 if href:
                     links.append(href)
@@ -52,9 +54,10 @@ async def parse_meloua(query: str) -> list:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
+            logging.debug(f"🔍 HTML-сторінка для meloua.com:\n{html[:1000]}")
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for a in soup.find_all("a", class_="btn-download"):  # Змінили селектор
+            for a in soup.find_all("a", class_="btn-download"):
                 href = a.get("href")
                 if href:
                     links.append(href)
@@ -66,9 +69,10 @@ async def parse_sefon(query: str) -> list:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
+            logging.debug(f"🔍 HTML-сторінка для sefon.pro:\n{html[:1000]}")
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for a in soup.find_all("a", class_="download__btn"):  # Змінили селектор
+            for a in soup.find_all("a", class_="download__btn"):
                 href = a.get("href")
                 if href:
                     links.append(href)
@@ -80,9 +84,10 @@ async def parse_drivemusic(query: str) -> list:
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
+            logging.debug(f"🔍 HTML-сторінка для drivemusic.club:\n{html[:1000]}")
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for a in soup.find_all("a", class_="download__btn"):  # Змінили селектор
+            for a in soup.find_all("a", class_="download__btn"):
                 href = a.get("href")
                 if href:
                     links.append(href)
