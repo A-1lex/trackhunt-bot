@@ -5,6 +5,7 @@ from aiogram.utils.executor import start_webhook
 from config import BOT_TOKEN, WEBHOOK_URL
 from handlers import register_handlers
 from utils import setup_webhook
+from database import init_db  # 👈 додай цей імпорт
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -12,6 +13,8 @@ dp = Dispatcher(bot)
 logging.basicConfig(level=logging.INFO)
 
 register_handlers(dp)
+
+init_db()  # 👈 і цей виклик перед запуском
 
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
