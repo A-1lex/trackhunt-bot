@@ -2,6 +2,7 @@ import aiohttp
 import os
 import logging
 from bs4 import BeautifulSoup
+import re
 
 TEMP_DIR = "temp_downloads"
 os.makedirs(TEMP_DIR, exist_ok=True)
@@ -9,7 +10,11 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 async def extract_mp3_link(page_url: str) -> str:
     """
-    Видобуває пряме mp3-посилання зі сторінок mp3xa.fm або mp3uk.net.
+    Витягує mp3-посилання з HTML-сторінки.
+    Підтримує:
+    - <source src="...">
+    - <a href="...mp3">
+    - var mp3 = "..."; (всередині <script>)
     """
     try:
         async with aiohttp.ClientSession() as session:
@@ -20,16 +25,23 @@ async def extract_mp3_link(page_url: str) -> str:
                 html = await resp.text()
                 soup = BeautifulSoup(html, "html.parser")
 
-                # mp3xa.fm → <source src="..." type="audio/mpeg">
-                source = soup.find("source", {"src": True})
+                # 1. <source src="...mp3">
+                source = soup.find("source", src=True)
                 if source and source["src"].endswith(".mp3"):
                     return source["src"]
 
-                # mp3uk.net → <a class="download-btn" href="...mp3">
+                # 2. <a href="...mp3">
                 for a in soup.find_all("a", href=True):
-                    href = a["href"]
-                    if href.endswith(".mp3"):
-                        return href
+                    if ".mp3" in a["href"]:
+                        return a["href"]
+
+                # 3. <script> var mp3 = "..."; </script>
+                scripts = soup.find_all("script")
+                for script in scripts:
+                    if script.string:
+                        match = re.search(r'var\s+mp3\s*=\s*"([^"]+\.mp3)"', script.string)
+                        if match:
+                            return match.group(1)
 
     except Exception as e:
         logging.error(f"❌ Помилка при видобуванні mp3 з {page_url}: {e}")
@@ -38,7 +50,7 @@ async def extract_mp3_link(page_url: str) -> str:
 
 async def download_mp3(page_url: str, filename: str = "track.mp3") -> str:
     """
-    Завантажує mp3-файл із посилання на сторінку, де знаходиться трек.
+    Завантажує mp3 з витягнутого лінку.
     """
     try:
         mp3_link = await extract_mp3_link(page_url)
