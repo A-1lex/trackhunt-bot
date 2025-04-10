@@ -1,16 +1,9 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+BOT_TOKEN = "8046318140:AAG7FPa1qmJc_3j7Nk63PdgT0N97tTRP7FI"
+CHANNEL_ID = 1002559409885
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
-WEBHOOK_URL = os.getenv("WEBHOOK_URL") or "https://your-webhook-url.com/webhook"
+DB_PATH = "app/database.db"
 
-# Папка кешованих аудіофайлів
-CACHE_FOLDER = "cache"
-if not os.path.exists(CACHE_FOLDER):
-    os.makedirs(CACHE_FOLDER)
-
-# Кількість треків на сторінку при пагінації
-PAGE_SIZE = 10
+# URL для вебхуку – встановлюється через змінні середовища або використовується значення за замовчуванням
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://trackhunt-bot.onrender.com/webhook")
