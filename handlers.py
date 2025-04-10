@@ -2,7 +2,6 @@ from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from utils import get_track, rate_limiter
 from database import get_favorites, save_favorite, get_top_queries
-from search_sources import parse_z1fm
 import logging
 
 
@@ -78,7 +77,6 @@ async def search_handler(message: types.Message):
     )
 
 
-async def debug_z1fm(message: types.Message):
     query = message.get_args().strip() or "Eminem - Mockingbird"
     results = await parse_z1fm(query)
     logging.info(f"🧪 DEBUG /z1fm: знайдено {len(results)} посилань")
@@ -96,6 +94,5 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(getid_handler, commands=["getid"])
     dp.register_message_handler(popular_handler, commands=["popular"])
     dp.register_message_handler(favorites_handler, commands=["favorites"])
-    dp.register_message_handler(debug_z1fm, commands=["debug"])
     dp.register_callback_query_handler(callback_handler, lambda c: c.data and c.data.startswith("fav:"))
     dp.register_message_handler(search_handler, content_types=types.ContentType.TEXT)
