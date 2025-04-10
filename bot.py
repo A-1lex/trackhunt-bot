@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import os
 from aiogram import Bot, Dispatcher, types
@@ -9,7 +8,7 @@ from handlers import register_handlers
 from inline import register_inline
 from database import init_db
 
-WEBHOOK_HOST = os.getenv("RENDER_EXTERNAL_URL")  # Render автоматично створює це
+WEBHOOK_HOST = os.getenv("RENDER_EXTERNAL_URL")
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
