@@ -4,13 +4,15 @@ from utils import rate_limiter, get_audio_from_google
 from database import get_top_queries, save_favorite, get_favorites
 import logging
 
+
 @rate_limiter(3)
 async def handle_message(message: types.Message):
     query = message.text.strip()
+    logging.info(f"📩 Отримано повідомлення: {query}")
     track = await get_audio_from_google(query, message.from_user.id)
 
     if not track:
-        await message.reply("Не знайдено результатів. Спробуйте інший запит.")
+        # Відповідь уже відправлена у utils.py
         return
 
     keyboard = InlineKeyboardMarkup().add(
@@ -25,10 +27,11 @@ async def handle_message(message: types.Message):
         reply_markup=keyboard
     )
 
+
 async def popular_command(message: types.Message):
     top = get_top_queries(limit=10)
     if not top:
-        await message.reply("Немає даних для статистики.")
+        await message.reply("📊 Немає ще популярних запитів.")
         return
 
     response = "🔥 Найпопулярніші запити:\n\n"
@@ -36,10 +39,11 @@ async def popular_command(message: types.Message):
         response += f"{i}. {row[0]} — {row[1]} раз(ів)\n"
     await message.reply(response)
 
+
 async def favorites_command(message: types.Message):
     favs = get_favorites(message.from_user.id)
     if not favs:
-        await message.reply("У вас немає обраних треків.")
+        await message.reply("📂 У вас немає обраних треків.")
         return
 
     for row in favs:
@@ -49,6 +53,7 @@ async def favorites_command(message: types.Message):
             performer=row[2],
             caption=f"🎵 {row[1]} — {row[2]}"
         )
+
 
 async def callback_handler(callback: types.CallbackQuery):
     data = callback.data
@@ -61,6 +66,7 @@ async def callback_handler(callback: types.CallbackQuery):
         save_favorite(user_id, file_id, title, performer)
         logging.info(f"⭐ {user_id} додав в обране: {title} — {performer}")
         await callback.answer("✅ Додано в обране")
+
 
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(handle_message, content_types=types.ContentType.TEXT)
