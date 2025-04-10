@@ -14,10 +14,8 @@ bot_instance: Bot = None  # буде призначено у setup_webhook
 async def get_track(query: str, user_id: int) -> dict:
     log_query(query)
 
-    # 1. Пробуємо точний кеш
     cached = get_cached_track(query)
     if not cached:
-        # 2. Пробуємо знайти схожий запит через Fuzzy
         similar = find_similar_query(query)
         if similar:
             logging.info(f"🔁 Fuzzy-результат: {similar}")
@@ -26,8 +24,13 @@ async def get_track(query: str, user_id: int) -> dict:
     if cached:
         return cached
 
-    # 3. Якщо кеш не знайдено — парсимо напряму
     links = await search_music_links(query)
+    logging.info(f"🔎 Загалом отримано {len(links)} посилань для: {query}")
+
+    if not links:
+        logging.warning(f"❌ Жоден сайт не дав результатів для: {query}")
+        return {}
+
     for idx, url in enumerate(links):
         filename = f"{user_id}_{idx}.mp3"
         path = await download_mp3(url, filename)
@@ -51,6 +54,7 @@ async def get_track(query: str, user_id: int) -> dict:
             except Exception as e:
                 logging.error(f"❌ Не вдалося надіслати аудіо: {e}")
 
+    logging.warning(f"❌ Не вдалося обробити жоден з {len(links)} треків")
     return {}
 
 
@@ -80,7 +84,10 @@ def rate_limiter(delay):
                 await message.reply("⏳ Занадто швидко. Зачекайте кілька секунд.")
                 return
             user_times[user_id] = now
-            return await func(message)
+            result = await func(message)
+            if not result:
+                await message.reply("❌ Не вдалося знайти цей трек на відомих джерелах. Спробуйте іншу назву.")
+            return result
         return wrapper
     return decorator
 
