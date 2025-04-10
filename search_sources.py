@@ -1,94 +1,73 @@
-import aiohttp
-from bs4 import BeautifulSoup
+import requests
 import logging
+from lxml import etree
+import json
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
-}
+class SoundCloud:
+    """
+    Надає мінімалістичний інтерфейс до SoundCloud API для пошуку та завантаження треків.
+    """
 
-async def search_music_links(query: str) -> list:
-    all_links = []
-    for parser in [parse_z3fm, parse_mp3wr, parse_meloua, parse_sefon, parse_drivemusic]:
+    def __init__(self, client_id):
+        self.client_id = client_id
+        self.base_url = "https://api.soundcloud.com"
+        self.HTMLParser = etree.HTMLParser()
+        self._build_browser()
+
+    def _build_browser(self):
+        """Ініціалізація браузера для обробки запитів"""
+        self.browser = requests.Session()
+        self.browser.headers.update({"User-Agent": "Mozilla/5.0"})
+
+    def url(self, endpoint):
+        """Формуємо URL для доступу до SoundCloud API"""
+        return f"{self.base_url}{endpoint}?client_id={self.client_id}"
+
+    def find_track_id(self, url):
+        """
+        Знаходимо track_id для пісні з профілю SoundCloud.
+        """
+        response = self.browser.get(url)
+        tree = etree.HTML(response.text, self.HTMLParser)
         try:
-            results = await parser(query)
-            logging.info(f"🔍 {parser.__name__} знайшов {len(results)} посилань")
-            all_links.extend(results)
-        except Exception as e:
-            logging.warning(f"⚠️ Парсер {parser.__name__} не спрацював: {e}")
-    logging.info(f"🔗 Загалом зібрано {len(all_links)} посилань для: {query}")
-    return all_links
+            track_url = tree.xpath("//meta[contains(@content, 'https://w.soundcloud.com')]")[0]
+        except IndexError:
+            track_url = None
 
+        if track_url is not None:
+            track_id = track_url.attrib["content"].split("%2Ftracks%2F")[1].split("&")[0]
+            return track_id
+        return None
 
-async def parse_z3fm(query: str) -> list:
-    search_url = f"https://z3.fm/mp3/search?keywords={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as resp:
-            html = await resp.text()
-            logging.debug(f"🔍 HTML-сторінка для z3.fm:\n{html[:1000]}")  # Логую перші 1000 символів HTML
-            soup = BeautifulSoup(html, "html.parser")
-            links = []
-            for a in soup.find_all("a", class_="download"):
-                href = a.get("href")
-                if href:
-                    links.append(f"https://z3.fm{href}")
-            return links
+    def get_track_info(self, track_id):
+        """
+        Отримуємо інформацію про трек за допомогою SoundCloud API
+        """
+        url = self.url(f"/tracks/{track_id}/")
+        response = self.browser.get(url)
+        return json.loads(response.text)
 
+    def download_track(self, track_id):
+        """
+        Завантажуємо трек через SoundCloud API.
+        """
+        url = self.url(f"/tracks/{track_id}/download")
+        response = self.browser.get(url)
+        with open(f"track_{track_id}.mp3", "wb") as file:
+            file.write(response.content)
+        logging.info(f"Завантажено трек: {track_id}")
 
-async def parse_mp3wr(query: str) -> list:
-    search_url = f"https://mp3wr.com/?s={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as resp:
-            html = await resp.text()
-            logging.debug(f"🔍 HTML-сторінка для mp3wr.com:\n{html[:1000]}")
-            soup = BeautifulSoup(html, "html.parser")
-            links = []
-            for a in soup.find_all("a", class_="btn-download"):
-                href = a.get("href")
-                if href:
-                    links.append(href)
-            return links
-
-
-async def parse_meloua(query: str) -> list:
-    search_url = f"https://meloua.com/?s={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as resp:
-            html = await resp.text()
-            logging.debug(f"🔍 HTML-сторінка для meloua.com:\n{html[:1000]}")
-            soup = BeautifulSoup(html, "html.parser")
-            links = []
-            for a in soup.find_all("a", class_="btn-download"):
-                href = a.get("href")
-                if href:
-                    links.append(href)
-            return links
-
-
-async def parse_sefon(query: str) -> list:
-    search_url = f"https://sefon.pro/?s={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as resp:
-            html = await resp.text()
-            logging.debug(f"🔍 HTML-сторінка для sefon.pro:\n{html[:1000]}")
-            soup = BeautifulSoup(html, "html.parser")
-            links = []
-            for a in soup.find_all("a", class_="download__btn"):
-                href = a.get("href")
-                if href:
-                    links.append(href)
-            return links
-
-
-async def parse_drivemusic(query: str) -> list:
-    search_url = f"https://drivemusic.club/?s={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as resp:
-            html = await resp.text()
-            logging.debug(f"🔍 HTML-сторінка для drivemusic.club:\n{html[:1000]}")
-            soup = BeautifulSoup(html, "html.parser")
-            links = []
-            for a in soup.find_all("a", class_="download__btn"):
-                href = a.get("href")
-                if href:
-                    links.append(href)
-            return links
+    def download_song(self, url):
+        """
+        Основна функція для завантаження пісні.
+        """
+        track_id = self.find_track_id(url)
+        if track_id:
+            track_info = self.get_track_info(track_id)
+            if track_info and track_info.get('downloadable', False):
+                logging.info(f"[Завантаження] {track_info['title']}...")
+                self.download_track(track_id)
+            else:
+                logging.error("[Помилка] Файл недоступний для завантаження.")
+        else:
+            logging.error("[Помилка] Трек не знайдено.")
