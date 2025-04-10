@@ -8,7 +8,7 @@ HEADERS = {
 
 async def search_music_links(query: str) -> list:
     all_links = []
-    for parser in [parse_muzmix, parse_muzzofor, parse_muzon]:
+    for parser in [parse_z3fm, parse_mp3wr, parse_meloua, parse_sefon, parse_drivemusic]:
         try:
             results = await parser(query)
             logging.info(f"🔍 {parser.__name__} знайшов {len(results)} посилань")
@@ -19,41 +19,71 @@ async def search_music_links(query: str) -> list:
     return all_links
 
 
-async def parse_muzmix(query: str) -> list:
-    search_url = f"https://muzmix.net/search?q={query.replace(' ', '+')}"
+async def parse_z3fm(query: str) -> list:
+    search_url = f"https://z3.fm/mp3/search?keywords={query.replace(' ', '+')}"
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for div in soup.select("div.music-content"):
-                a = div.find("a", class_="btn-download")
-                if a and a.get("href"):
-                    links.append(f"https://muzmix.net{a['href']}")
+            for a in soup.find_all("a", class_="download"):
+                href = a.get("href")
+                if href:
+                    links.append(f"https://z3.fm{href}")
             return links
 
 
-async def parse_muzzofor(query: str) -> list:
-    search_url = f"https://muzzofor.me/index.php?do=search&subaction=search&story={query.replace(' ', '+')}"
+async def parse_mp3wr(query: str) -> list:
+    search_url = f"https://mp3wr.com/?s={query.replace(' ', '+')}"
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for a in soup.select("a.short-poster__download"):
-                if a.get("href"):
-                    links.append(a["href"])
+            for a in soup.find_all("a", class_="btn-download"):  # Змінили селектор
+                href = a.get("href")
+                if href:
+                    links.append(href)
             return links
 
 
-async def parse_muzon(query: str) -> list:
-    search_url = f"https://muzon.fm/search/{query.replace(' ', '+')}"
+async def parse_meloua(query: str) -> list:
+    search_url = f"https://meloua.com/?s={query.replace(' ', '+')}"
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         async with session.get(search_url, timeout=10) as resp:
             html = await resp.text()
             soup = BeautifulSoup(html, "html.parser")
             links = []
-            for a in soup.select("a.music-download"):
-                if a.get("href"):
-                    links.append(f"https://muzon.fm{a['href']}")
+            for a in soup.find_all("a", class_="btn-download"):  # Змінили селектор
+                href = a.get("href")
+                if href:
+                    links.append(href)
+            return links
+
+
+async def parse_sefon(query: str) -> list:
+    search_url = f"https://sefon.pro/?s={query.replace(' ', '+')}"
+    async with aiohttp.ClientSession(headers=HEADERS) as session:
+        async with session.get(search_url, timeout=10) as resp:
+            html = await resp.text()
+            soup = BeautifulSoup(html, "html.parser")
+            links = []
+            for a in soup.find_all("a", class_="download__btn"):  # Змінили селектор
+                href = a.get("href")
+                if href:
+                    links.append(href)
+            return links
+
+
+async def parse_drivemusic(query: str) -> list:
+    search_url = f"https://drivemusic.club/?s={query.replace(' ', '+')}"
+    async with aiohttp.ClientSession(headers=HEADERS) as session:
+        async with session.get(search_url, timeout=10) as resp:
+            html = await resp.text()
+            soup = BeautifulSoup(html, "html.parser")
+            links = []
+            for a in soup.find_all("a", class_="download__btn"):  # Змінили селектор
+                href = a.get("href")
+                if href:
+                    links.append(href)
             return links
