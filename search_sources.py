@@ -10,12 +10,12 @@ HEADERS = {
 
 async def search_music_links(query: str) -> list:
     """
-    Шукає пісню напряму на mp3xa.fm через їхній внутрішній пошук.
-    Повертає список посилань на сторінки треків.
+    Прямий пошук на mp3xa.fm через їхній пошуковий інтерфейс.
+    Повертає список URL треків.
     """
     results = []
-    search_query = urllib.parse.quote_plus(query)
-    search_url = f"https://mp3xa.fm/search/?q={search_query}"
+    encoded_query = urllib.parse.quote_plus(query)
+    search_url = f"https://mp3xa.fm/search/?q={encoded_query}"
 
     try:
         async with aiohttp.ClientSession(headers=HEADERS) as session:
@@ -24,16 +24,14 @@ async def search_music_links(query: str) -> list:
                     html = await response.text()
                     soup = BeautifulSoup(html, "html.parser")
 
-                    # Знаходимо перші <a href="/mp3/...">
                     for a in soup.find_all("a", href=True):
                         href = a["href"]
                         if href.startswith("/mp3/") and href.endswith(".html"):
                             full_url = f"https://mp3xa.fm{href}"
                             if full_url not in results:
                                 results.append(full_url)
-
     except Exception as e:
-        logging.warning(f"❌ Помилка при прямому пошуку на mp3xa.fm: {e}")
+        logging.warning(f"❌ Помилка при пошуку на mp3xa.fm: {e}")
 
     logging.info(f"🔗 Знайдено {len(results)} результатів для '{query}'")
     return results

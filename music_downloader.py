@@ -10,7 +10,7 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 async def extract_mp3_link(page_url: str) -> str:
     """
     Витягує mp3-посилання з HTML-сторінки на mp3xa.fm.
-    Підтримує <source> або <a href="...mp3">
+    Працює з <source> або <a href="...mp3">
     """
     try:
         async with aiohttp.ClientSession() as session:
@@ -21,12 +21,12 @@ async def extract_mp3_link(page_url: str) -> str:
                 html = await resp.text()
                 soup = BeautifulSoup(html, "html.parser")
 
-                # <source src="...mp3">
+                # 1. <source src="...mp3">
                 source = soup.find("source", src=True)
                 if source and source["src"].endswith(".mp3"):
                     return source["src"]
 
-                # <a href="...mp3">
+                # 2. <a href="...mp3">
                 for a in soup.find_all("a", href=True):
                     if ".mp3" in a["href"]:
                         return a["href"]
@@ -38,24 +38,24 @@ async def extract_mp3_link(page_url: str) -> str:
 
 async def download_mp3(page_url: str, filename: str = "track.mp3") -> str:
     """
-    Завантажує mp3-файл із вказаної сторінки.
+    Завантажує mp3-файл із URL, витягнутого зі сторінки треку.
     """
     try:
-        mp3_link = await extract_mp3_link(page_url)
-        if not mp3_link:
-            logging.warning(f"⚠️ Не знайдено mp3 на сторінці: {page_url}")
+        mp3_url = await extract_mp3_link(page_url)
+        if not mp3_url:
+            logging.warning(f"⚠️ mp3 не знайдено на сторінці: {page_url}")
             return ""
 
         filepath = os.path.join(TEMP_DIR, filename)
         async with aiohttp.ClientSession() as session:
-            async with session.get(mp3_link, timeout=20) as resp:
+            async with session.get(mp3_url, timeout=20) as resp:
                 if resp.status == 200 and "audio" in resp.headers.get("Content-Type", ""):
                     with open(filepath, "wb") as f:
                         f.write(await resp.read())
-                    logging.info(f"⬇️ Завантажено: {mp3_link}")
+                    logging.info(f"⬇️ Завантажено: {mp3_url}")
                     return filepath
                 else:
-                    logging.warning(f"⚠️ Відповідь не містить mp3: {mp3_link}")
+                    logging.warning(f"⚠️ Відповідь не містить mp3: {mp3_url}")
     except Exception as e:
         logging.warning(f"❌ Завантаження не вдалося: {e}")
     return ""
