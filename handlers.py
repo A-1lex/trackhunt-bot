@@ -16,28 +16,6 @@ async def get_channel_id(message: types.Message):
     else:
         await message.reply("ℹ️ Перешли мені повідомлення з каналу.")
 
-# ✅ Обробка тексту
-@rate_limiter(3)
-async def handle_message(message: types.Message):
-    query = message.text.strip()
-    track = await get_audio_from_google(query, message.from_user.id)
-
-    if not track:
-        await message.reply("Не знайдено результатів. Спробуйте інший запит.")
-        return
-
-    keyboard = InlineKeyboardMarkup().add(
-        InlineKeyboardButton("⭐ Додати в обране", callback_data=f"fav:{track['file_id']}")
-    )
-
-    await message.answer_audio(
-        audio=track["file_id"],
-        title=track["title"],
-        performer=track["artist"],
-        caption=f"🎵 {track['title']} — {track['artist']}",
-        reply_markup=keyboard
-    )
-
 # ✅ /popular
 async def popular_command(message: types.Message):
     top = get_top_queries(limit=10)
@@ -65,7 +43,7 @@ async def favorites_command(message: types.Message):
             caption=f"🎵 {row[1]} — {row[2]}"
         )
 
-# ✅ Обробка натискання кнопки
+# ✅ Додавання до обраного
 async def callback_handler(callback: types.CallbackQuery):
     data = callback.data
     if data.startswith("fav:"):
@@ -77,6 +55,28 @@ async def callback_handler(callback: types.CallbackQuery):
         save_favorite(user_id, file_id, title, performer)
         logging.info(f"⭐ {user_id} додав в обране: {title} — {performer}")
         await callback.answer("✅ Додано в обране")
+
+# ✅ Пошук за текстом
+@rate_limiter(3)
+async def handle_message(message: types.Message):
+    query = message.text.strip()
+    track = await get_audio_from_google(query, message.from_user.id)
+
+    if not track:
+        await message.reply("Не знайдено результатів. Спробуйте інший запит.")
+        return
+
+    keyboard = InlineKeyboardMarkup().add(
+        InlineKeyboardButton("⭐ Додати в обране", callback_data=f"fav:{track['file_id']}")
+    )
+
+    await message.answer_audio(
+        audio=track["file_id"],
+        title=track["title"],
+        performer=track["artist"],
+        caption=f"🎵 {track['title']} — {track['artist']}",
+        reply_markup=keyboard
+    )
 
 # ✅ Реєстрація всіх хендлерів
 def register_handlers(dp: Dispatcher):
