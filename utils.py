@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot
 from config import CHANNEL_ID, CACHE_FOLDER, PAGE_SIZE
 from database import get_cached_track, save_track, log_query, get_all_queries
-from google_scraper import search_music_links
+from search_sources import search_music_links
 from music_downloader import download_mp3
 import asyncio
 from functools import wraps
@@ -26,7 +26,7 @@ async def get_track(query: str, user_id: int) -> dict:
     if cached:
         return cached
 
-    # 3. Якщо кеш не знайдено — шукаємо через Google
+    # 3. Якщо кеш не знайдено — парсимо напряму
     links = await search_music_links(query)
     for idx, url in enumerate(links):
         filename = f"{user_id}_{idx}.mp3"
