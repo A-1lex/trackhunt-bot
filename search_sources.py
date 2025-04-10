@@ -3,6 +3,7 @@ import logging
 from bs4 import BeautifulSoup
 import urllib.parse
 
+# Робочі сайти, які ми перевіряємо через Google
 SEARCH_SITES = [
     "mp3xa.fm",
     "mp3uk.net"
@@ -15,12 +16,13 @@ HEADERS = {
 
 async def search_music_links(query: str) -> list:
     """
-    Шукає посилання на сторінки з музикою з сайту mp3xa.fm і mp3uk.net через Google.
+    Шукає сторінки з mp3 на mp3xa.fm і mp3uk.net через Google з покращеним запитом.
     """
     results = []
 
     for site in SEARCH_SITES:
-        search_query = f"site:{site} {query} mp3"
+        # ✅ Покращений запит: точна фраза + фільтр типу файлу
+        search_query = f'"{query}" site:{site} filetype:mp3'
         encoded_query = urllib.parse.quote_plus(search_query)
         search_url = f"https://www.google.com/search?q={encoded_query}"
 
