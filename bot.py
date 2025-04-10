@@ -1,51 +1,44 @@
-
+# -*- coding: utf-8 -*-
 import logging
-from aiogram import Bot, Dispatcher, executor, types
+import os
+from aiogram import Bot, Dispatcher, types
+from aiogram.utils.executor import start_webhook
+
 from config import BOT_TOKEN
 from handlers import register_handlers
 from inline import register_inline
 from database import init_db
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("logs/bot.log"),
-        logging.StreamHandler()
-    ]
-)
+WEBHOOK_HOST = os.getenv("RENDER_EXTERNAL_URL")  # Render автоматично створює це
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
+WEBAPP_HOST = "0.0.0.0"
+WEBAPP_PORT = int(os.getenv("PORT", 5000))
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
+
+logging.basicConfig(level=logging.INFO)
 
 init_db()
 register_handlers(dp)
 register_inline(dp)
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
-import logging
-from aiogram import Bot, Dispatcher, executor, types
-from config import BOT_TOKEN
-from handlers import register_handlers
-from inline import register_inline
-from database import init_db
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+    logging.info(f"✅ Webhook встановлено: {WEBHOOK_URL}")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("logs/bot.log"),
-        logging.StreamHandler()
-    ]
-)
+async def on_shutdown(dp):
+    logging.info("⛔ Вимкнення бота...")
+    await bot.delete_webhook()
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher(bot)
-
-init_db()
-register_handlers(dp)
-register_inline(dp)
-
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+if __name__ == "__main__":
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
