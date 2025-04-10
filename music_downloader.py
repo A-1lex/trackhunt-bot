@@ -2,7 +2,6 @@ import aiohttp
 import os
 import logging
 from bs4 import BeautifulSoup
-import re
 
 TEMP_DIR = "temp_downloads"
 os.makedirs(TEMP_DIR, exist_ok=True)
@@ -10,11 +9,8 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 async def extract_mp3_link(page_url: str) -> str:
     """
-    Витягує mp3-посилання з HTML-сторінки.
-    Підтримує:
-    - <source src="...">
-    - <a href="...mp3">
-    - var mp3 = "..."; (всередині <script>)
+    Витягує mp3-посилання з HTML-сторінки на mp3xa.fm.
+    Підтримує <source> або <a href="...mp3">
     """
     try:
         async with aiohttp.ClientSession() as session:
@@ -25,32 +21,24 @@ async def extract_mp3_link(page_url: str) -> str:
                 html = await resp.text()
                 soup = BeautifulSoup(html, "html.parser")
 
-                # 1. <source src="...mp3">
+                # <source src="...mp3">
                 source = soup.find("source", src=True)
                 if source and source["src"].endswith(".mp3"):
                     return source["src"]
 
-                # 2. <a href="...mp3">
+                # <a href="...mp3">
                 for a in soup.find_all("a", href=True):
                     if ".mp3" in a["href"]:
                         return a["href"]
 
-                # 3. <script> var mp3 = "..."; </script>
-                scripts = soup.find_all("script")
-                for script in scripts:
-                    if script.string:
-                        match = re.search(r'var\s+mp3\s*=\s*"([^"]+\.mp3)"', script.string)
-                        if match:
-                            return match.group(1)
-
     except Exception as e:
-        logging.error(f"❌ Помилка при видобуванні mp3 з {page_url}: {e}")
+        logging.error(f"❌ Помилка при вилученні mp3 з {page_url}: {e}")
     return ""
 
 
 async def download_mp3(page_url: str, filename: str = "track.mp3") -> str:
     """
-    Завантажує mp3 з витягнутого лінку.
+    Завантажує mp3-файл із вказаної сторінки.
     """
     try:
         mp3_link = await extract_mp3_link(page_url)
@@ -67,7 +55,7 @@ async def download_mp3(page_url: str, filename: str = "track.mp3") -> str:
                     logging.info(f"⬇️ Завантажено: {mp3_link}")
                     return filepath
                 else:
-                    logging.warning(f"⚠️ Невірна відповідь при спробі завантаження: {mp3_link}")
+                    logging.warning(f"⚠️ Відповідь не містить mp3: {mp3_link}")
     except Exception as e:
         logging.warning(f"❌ Завантаження не вдалося: {e}")
     return ""
