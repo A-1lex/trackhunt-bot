@@ -5,7 +5,18 @@ from utils import rate_limiter, get_audio_from_google
 from database import get_top_queries, save_favorite, get_favorites
 import logging
 
+# ✅ /start
+async def start_handler(message: types.Message):
+    await message.reply("Привіт! 👋 Я бот TrackHunt.\nВведи назву пісні або виконавця, щоб знайти музику 🎧")
 
+# ✅ /getid
+async def get_channel_id(message: types.Message):
+    if message.forward_from_chat:
+        await message.reply(f"📌 Chat ID: `{message.forward_from_chat.id}`", parse_mode="Markdown")
+    else:
+        await message.reply("ℹ️ Перешли мені повідомлення з каналу.")
+
+# ✅ Обробка тексту
 @rate_limiter(3)
 async def handle_message(message: types.Message):
     query = message.text.strip()
@@ -27,7 +38,7 @@ async def handle_message(message: types.Message):
         reply_markup=keyboard
     )
 
-
+# ✅ /popular
 async def popular_command(message: types.Message):
     top = get_top_queries(limit=10)
     if not top:
@@ -39,7 +50,7 @@ async def popular_command(message: types.Message):
         response += f"{i}. {row[0]} — {row[1]} раз(ів)\n"
     await message.reply(response)
 
-
+# ✅ /favorites
 async def favorites_command(message: types.Message):
     favs = get_favorites(message.from_user.id)
     if not favs:
@@ -54,7 +65,7 @@ async def favorites_command(message: types.Message):
             caption=f"🎵 {row[1]} — {row[2]}"
         )
 
-
+# ✅ Обробка натискання кнопки
 async def callback_handler(callback: types.CallbackQuery):
     data = callback.data
     if data.startswith("fav:"):
@@ -67,18 +78,11 @@ async def callback_handler(callback: types.CallbackQuery):
         logging.info(f"⭐ {user_id} додав в обране: {title} — {performer}")
         await callback.answer("✅ Додано в обране")
 
-
-# ✅ Команда для отримання numeric channel ID
-async def get_channel_id(message: types.Message):
-    if message.forward_from_chat:
-        await message.reply(f"📌 Chat ID: `{message.forward_from_chat.id}`", parse_mode="Markdown")
-    else:
-        await message.reply("ℹ️ Перешли мені повідомлення з каналу.")
-
-
+# ✅ Реєстрація всіх хендлерів
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(handle_message, content_types=types.ContentType.TEXT)
+    dp.register_message_handler(start_handler, commands=["start"])
+    dp.register_message_handler(get_channel_id, commands=["getid"])
     dp.register_message_handler(popular_command, commands=["popular"])
     dp.register_message_handler(favorites_command, commands=["favorites"])
     dp.register_callback_query_handler(callback_handler, lambda c: c.data and c.data.startswith("fav:"))
-    dp.register_message_handler(get_channel_id, commands=["getid"])
+    dp.register_message_handler(handle_message, content_types=types.ContentType.TEXT)
