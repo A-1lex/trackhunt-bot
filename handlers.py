@@ -81,4 +81,4 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(popular_command, commands=["popular"])
     dp.register_message_handler(favorites_command, commands=["favorites"])
     dp.register_callback_query_handler(callback_handler, lambda c: c.data and c.data.startswith("fav:"))
-    dp.register_message_handler(get_channel_
+    dp.register_message_handler(get_channel_id, commands=["getid"])
