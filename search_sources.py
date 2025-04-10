@@ -10,8 +10,8 @@ HEADERS = {
 
 async def search_music_links(query: str) -> list:
     """
-    Прямий пошук на mp3xa.fm через їхній пошуковий інтерфейс.
-    Повертає список URL треків.
+    Пошук треків на mp3xa.fm. Парсить кнопки "Скачать" з класом download_btn.
+    Повертає список посилань на сторінки з піснями.
     """
     results = []
     encoded_query = urllib.parse.quote_plus(query)
@@ -24,12 +24,13 @@ async def search_music_links(query: str) -> list:
                     html = await response.text()
                     soup = BeautifulSoup(html, "html.parser")
 
-                    for a in soup.find_all("a", href=True):
+                    for a in soup.find_all("a", class_="download_btn", href=True):
                         href = a["href"]
-                        if href.startswith("/mp3/") and href.endswith(".html"):
+                        if href.startswith("/"):
                             full_url = f"https://mp3xa.fm{href}"
                             if full_url not in results:
                                 results.append(full_url)
+
     except Exception as e:
         logging.warning(f"❌ Помилка при пошуку на mp3xa.fm: {e}")
 

@@ -9,8 +9,8 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 async def extract_mp3_link(page_url: str) -> str:
     """
-    Витягує mp3-посилання з HTML-сторінки на mp3xa.fm.
-    Працює з <source> або <a href="...mp3">
+    Витягує пряме посилання на mp3 із сторінки треку на mp3xa.fm.
+    Шукає <a itemprop="contentUrl" class="download_btn" href="...">
     """
     try:
         async with aiohttp.ClientSession() as session:
@@ -21,15 +21,10 @@ async def extract_mp3_link(page_url: str) -> str:
                 html = await resp.text()
                 soup = BeautifulSoup(html, "html.parser")
 
-                # 1. <source src="...mp3">
-                source = soup.find("source", src=True)
-                if source and source["src"].endswith(".mp3"):
-                    return source["src"]
-
-                # 2. <a href="...mp3">
-                for a in soup.find_all("a", href=True):
-                    if ".mp3" in a["href"]:
-                        return a["href"]
+                # Знаходимо посилання на справжній mp3
+                a = soup.find("a", class_="download_btn", itemprop="contentUrl", href=True)
+                if a and a["href"].endswith(".mp3"):
+                    return a["href"]
 
     except Exception as e:
         logging.error(f"❌ Помилка при вилученні mp3 з {page_url}: {e}")
@@ -38,7 +33,7 @@ async def extract_mp3_link(page_url: str) -> str:
 
 async def download_mp3(page_url: str, filename: str = "track.mp3") -> str:
     """
-    Завантажує mp3-файл із URL, витягнутого зі сторінки треку.
+    Завантажує mp3-файл із витягнутого лінка.
     """
     try:
         mp3_url = await extract_mp3_link(page_url)
