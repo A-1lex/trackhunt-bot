@@ -8,7 +8,7 @@ HEADERS = {
 
 async def search_music_links(query: str) -> list:
     all_links = []
-    for parser in [parse_z1fm, parse_musify, parse_muzmo, parse_mp3party, parse_hitmotop]:
+    for parser in [parse_muzmix, parse_muzzofor, parse_muzon]:
         try:
             results = await parser(query)
             logging.info(f"🔍 {parser.__name__} знайшов {len(results)} посилань")
@@ -19,46 +19,41 @@ async def search_music_links(query: str) -> list:
     return all_links
 
 
-async def parse_z1fm(query: str) -> list:
-    search_url = f"https://z1.fm/search?keywords={query.replace(' ', '+')}"
+async def parse_muzmix(query: str) -> list:
+    search_url = f"https://muzmix.net/search?q={query.replace(' ', '+')}"
     async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as response:
-            html = await response.text()
+        async with session.get(search_url, timeout=10) as resp:
+            html = await resp.text()
             soup = BeautifulSoup(html, "html.parser")
-            return [f"https://z1.fm{a.get('href')}" for a in soup.select(".track__download-btn") if a.get("href")]
+            links = []
+            for div in soup.select("div.music-content"):
+                a = div.find("a", class_="btn-download")
+                if a and a.get("href"):
+                    links.append(f"https://muzmix.net{a['href']}")
+            return links
 
 
-async def parse_musify(query: str) -> list:
-    search_url = f"https://musify.club/search?q={query.replace(' ', '+')}"
+async def parse_muzzofor(query: str) -> list:
+    search_url = f"https://muzzofor.me/index.php?do=search&subaction=search&story={query.replace(' ', '+')}"
     async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as response:
-            html = await response.text()
+        async with session.get(search_url, timeout=10) as resp:
+            html = await resp.text()
             soup = BeautifulSoup(html, "html.parser")
-            return [f"https://musify.club{a.get('href')}" for a in soup.select("a.block__download") if a.get("href")]
+            links = []
+            for a in soup.select("a.short-poster__download"):
+                if a.get("href"):
+                    links.append(a["href"])
+            return links
 
 
-async def parse_muzmo(query: str) -> list:
-    search_url = f"https://muzmo.cc/search?q={query.replace(' ', '+')}"
+async def parse_muzon(query: str) -> list:
+    search_url = f"https://muzon.fm/search/{query.replace(' ', '+')}"
     async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as response:
-            html = await response.text()
+        async with session.get(search_url, timeout=10) as resp:
+            html = await resp.text()
             soup = BeautifulSoup(html, "html.parser")
-            return [f"https://muzmo.cc{a.get('href')}" for a in soup.select("a.download-btn") if a.get("href")]
-
-
-async def parse_mp3party(query: str) -> list:
-    search_url = f"https://mp3party.net/search?query={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as response:
-            html = await response.text()
-            soup = BeautifulSoup(html, "html.parser")
-            return [f"https://mp3party.net{a.get('href')}" for a in soup.select("a.download") if a.get("href")]
-
-
-async def parse_hitmotop(query: str) -> list:
-    search_url = f"https://ru.hitmotop.com/search?q={query.replace(' ', '+')}"
-    async with aiohttp.ClientSession(headers=HEADERS) as session:
-        async with session.get(search_url, timeout=10) as response:
-            html = await response.text()
-            soup = BeautifulSoup(html, "html.parser")
-            return [f"https://ru.hitmotop.com{a.get('href')}" for a in soup.select(".track__download-btn") if a.get("href")]
+            links = []
+            for a in soup.select("a.music-download"):
+                if a.get("href"):
+                    links.append(f"https://muzon.fm{a['href']}")
+            return links
